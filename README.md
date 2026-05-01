@@ -1,5 +1,5 @@
 SuchitaToDo — Full Stack Task Management App
-A feature-rich To-Do application built with React and Node.js, designed to help users manage daily tasks with reminders, checklists, and a calendar view.
+A feature-rich To-Do application built with React and Capacitor, designed to help users manage daily tasks with reminders, checklists, and a calendar view.
 
 🚀 Features
 
@@ -10,11 +10,15 @@ A feature-rich To-Do application built with React and Node.js, designed to help 
 ✅ Checklists — track subtasks and mark them off one by one
 📅 Calendar view to track tasks by date
 📱 Mobile-friendly UI built with Capacitor (Android)
-🗄️ Persistent storage with MongoDB
+🗄️ Persistent storage with SQLite (Android) and localStorage (Web)
 
-
-🛠️ Tech Stack
-LayerTechnologyFrontendReact JS, JavaScriptBackendNode.js, ExpressDatabaseMongoDBMobileCapacitor (Android)StylingCSS
+Tech Stack
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React JS, JavaScript |
+| Database | SQLite (Android), localStorage (Web) |
+| Mobile | Capacitor (Android) |
+| Styling | CSS |
 
 📁 Project Structure
 SuchitaToDo/
@@ -38,7 +42,6 @@ SuchitaToDo/
 Prerequisites
 
 Node.js installed
-MongoDB running locally or MongoDB Atlas account
 
 Installation
 
@@ -64,4 +67,4 @@ Suchita Patharla
 🎓 B.Sc. Information Technology — Sasmira Institute of Commerce and Science, Mumbai
 
 📌 Note
-This project was built as a capstone (black book) project during my final year of B.Sc. IT. It demonstrates full-stack development skills including React state management, Node.js backend, MongoDB integration, and mobile deployment using Capacitor.
+This project was built as a capstone (black book) project during my final year of B.Sc. IT. It demonstrates full-stack development skills including React state management, SQLite database integration, localStorage for web, and mobile deployment using Capacitor.
