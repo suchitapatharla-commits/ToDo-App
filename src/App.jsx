@@ -10,7 +10,7 @@ import AddTaskModal from './components/AddTaskModal';
 import TaskList from './pages/TaskList';
 import SettingsPage from './pages/SettingsPage';
 import CalendarView from './components/CalendarView';
-import ChecklistPage from './pages/ChecklistPage';
+import CheckListPage from './pages/CheckListPage';
 
 function App() {
   const [isWeb] = useState(Capacitor.getPlatform() === 'web');
