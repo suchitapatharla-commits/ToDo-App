@@ -1,0 +1,778 @@
+/* --- GLOBAL VARIABLES --- */
+:root {
+  --primary: #6366f1; /* Indigo */
+  --bg-app: #f8fafc;  /* Slate 50 */
+  --text-main: #1e293b;
+  --text-sub: #64748b;
+  --danger: #ef4444;
+}
+
+/* 1. KEY FIX: UNLOCK SCROLLING & SIZE */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-app);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden; /* Prevent body bounce */
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* 2. MAIN APP CONTAINER */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-app);
+  position: relative;
+}
+
+/* 3. SCROLLABLE CONTENT AREA (The Fix) */
+.content-area {
+  flex: 1; /* Take all available space */
+  overflow-y: auto; /* ENABLE SCROLLING */
+  padding: 20px;
+  /* INCREASED PADDING so the bottom task doesn't hide behind the new bar */
+  padding-bottom: 150px; 
+  -webkit-overflow-scrolling: touch; /* Smooth scroll on iPhone/Android */
+}
+
+/* --- HEADER --- */
+.modern-header {
+  padding: 50px 20px 15px 20px; /* Extra top padding for status bar */
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0; /* Never shrink the header */
+}
+.header-title { margin: 0; font-size: 28px; font-weight: 800; color: var(--text-main); }
+.header-date { margin: 4px 0 0 0; color: var(--text-sub); font-size: 13px; font-weight: 600; text-transform: uppercase; }
+
+/* --- TASK LIST STYLES --- */
+.section-header {
+  font-size: 13px; font-weight: 700; color: var(--text-sub);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-top: 20px; margin-bottom: 10px; padding-left: 5px;
+}
+
+/* Task Card - High Visibility */
+.task-card {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+  color: var(--text-main); /* Force dark text */
+}
+
+.task-info-row {
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  overflow: hidden;
+}
+
+.task-title-text {
+  font-size: 16px; 
+  font-weight: 600; /* Made it slightly bolder for readability */
+  color: #1e293b;
+  margin: 0;
+  word-break: break-word; /* Allows long titles to wrap to the next line */
+  line-height: 1.3;
+}
+
+.due-tag-compact {
+  background: #eff6ff; color: var(--primary); padding: 4px 8px;
+  border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0;
+}
+
+.check-btn { background: none; border: none; padding: 0; cursor: pointer; color: #cbd5e1; }
+.task-actions { display: flex; align-items: center; gap: 10px; }
+.edit-btn, .delete-btn { background: none; border: none; cursor: pointer; padding: 4px; color: #94a3b8; }
+
+/* --- NEW ADD TASK BAR --- */
+.add-task-bar-wrapper {
+  position: absolute;
+  bottom: 90px; /* Sits 10px above the 80px bottom nav */
+  left: 0;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  z-index: 50;
+}
+
+.add-task-bar {
+  width: 100%;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 16px; /* Matches your task card radius */
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+
+.add-task-bar:active {
+  transform: scale(0.98);
+}
+
+/* --- BOTTOM NAV --- */
+.bottom-nav {
+  height: 80px; background: white; border-top: 1px solid #f1f5f9;
+  display: flex; justify-content: space-around; align-items: flex-start;
+  padding-top: 15px; position: absolute; bottom: 0; width: 100%; z-index: 40;
+}
+.bottom-nav button { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 5px; color: #94a3b8; font-size: 11px; font-weight: 500; }
+.bottom-nav button.active { color: var(--primary); }
+
+/* --- MODAL (Popup) --*/
+.add-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  
+  display: flex;
+  align-items: flex-start; 
+  justify-content: center;
+  /* THE FIX: Increased the bottom padding from 20px to 40px */
+  padding: 60px 20px 40px 20px; 
+}
+
+.add-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  
+  display: flex;
+  flex-direction: column;
+  /* THE FIX: Shrunk the height limit to guarantee it leaves space at the bottom */
+  max-height: calc(100vh - 120px); 
+  overflow-y: auto; 
+}
+
+.add-modal::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h2 { margin: 0; font-size: 20px; color: var(--text-main); }
+.close-btn { background: #f1f5f9; border: none; padding: 8px; border-radius: 50%; }
+
+.input-group { display: flex; flex-direction: column; gap: 20px; }
+.input-title {
+  width: 100%; font-size: 18px; padding: 10px 0; border: none; border-bottom: 1px solid #e2e8f0; 
+  outline: none; background: transparent; color: var(--text-main);
+}
+.input-desc {
+  width: 100%; font-family: inherit; font-size: 15px; padding: 12px; background: #f8fafc;
+  border-radius: 12px; border: none; outline: none; resize: none; color: var(--text-main);
+}
+
+.save-btn {
+  width: 100%; background: var(--primary); color: white; padding: 16px;
+  border-radius: 16px; border: none; font-size: 16px; font-weight: 600; margin-top: 20px;
+}
+
+/* --- SETTINGS --- */
+.setting-card {
+  background: white; border-radius: 16px; padding: 5px 0;
+  overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px;
+}
+.setting-header {
+  padding: 15px 20px; background: #f8fafc; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e2e8f0;
+}
+.setting-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: #1e293b; }
+.setting-icon { color: var(--primary); }
+.setting-item {
+  display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9; background: white;
+}
+.setting-item span { color: #334155; font-weight: 500; font-size: 15px; }
+.setting-explanation {
+  padding: 10px 20px 15px 20px; font-size: 13px; color: #94a3b8; background: white; font-style: italic; border-bottom: 1px solid #f1f5f9;
+}
+
+/* --- WEB PREVIEW (ONLY FOR LAPTOP) --- */
+.web-preview-container {
+  display: flex; justify-content: center; align-items: center;
+  height: 100vh; background: #1e1e1e;
+}
+.phone-frame {
+  width: 375px; height: 812px; background: white;
+  border-radius: 40px; border: 12px solid black; position: relative; overflow: hidden;
+}
+/* --- CALENDAR VIEW --- */
+.calendar-container {
+  background: white;
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  margin-bottom: 20px;
+}
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+.calendar-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 1px;
+}
+.calendar-nav-btn {
+  background: #f8fafc;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.calendar-nav-btn:active { background: #e2e8f0; }
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px 4px;
+  text-align: center;
+}
+.calendar-day-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+}
+.calendar-day {
+  position: relative;
+  height: 42px;
+  width: 42px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-main);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.calendar-day.empty { cursor: default; }
+.calendar-day.selected {
+  background: #7ca1ff; /* Custom soft blue from your reference */
+  color: white;
+  box-shadow: 0 4px 10px rgba(124, 161, 255, 0.4);
+  transform: scale(1.05);
+}
+.calendar-day.today {
+  background: #f1f5f9;
+  color: var(--primary);
+  font-weight: 700;
+}
+.calendar-dot {
+  width: 5px;
+  height: 5px;
+  background: #60a5fa; /* Light blue dot */
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px;
+}
+.calendar-day.selected .calendar-dot {
+  background: white; /* Dot turns white when selected */
+}
+/* --- BENTO GRID STYLES --- */
+.bento-section-title {
+  font-size: 18px; 
+  font-weight: 800; 
+  color: #1e293b;
+  margin: 30px 0 15px 5px;
+  letter-spacing: -0.5px;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 Columns */
+  gap: 12px;
+}
+
+/* The Magic Bento Trick: Every 3rd card spans the full width */
+.bento-card:nth-child(3n) {
+  grid-column: span 2;
+  flex-direction: row;
+  align-items: center;
+}
+
+.bento-card {
+  background: white; 
+  border-radius: 20px; 
+  padding: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  display: flex; 
+  flex-direction: column; 
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.bento-card:active {
+  transform: scale(0.97);
+}
+
+.bento-card-header {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: flex-start;
+}
+
+.bento-title {
+  font-size: 15px; 
+  font-weight: 700; 
+  color: #1e293b;
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  line-clamp: 2; /* <-- Added this line to make the linter happy! */
+  -webkit-box-orient: vertical; 
+  overflow: hidden;
+  line-height: 1.3;
+}
+/* --- FULL SCREEN OVERLAY (For Calendar) --- */
+.fullscreen-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-app);
+  z-index: 200; /* Higher than BottomNav */
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* --- SUB-NAVIGATION TABS (All Tasks Sorting) --- */
+.sub-nav-tabs {
+  display: flex;
+  background: #e2e8f0; /* Light grey background */
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.sub-nav-tabs button {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sub-nav-tabs button.active {
+  background: white;
+  color: #1e293b;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06); /* Pops the active button out */
+}
+/* --- CHECKLIST PAGE STYLES --- */
+.checklist-page {
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Space between cards */
+}
+
+.checklist-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.checklist-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 15px 0;
+  padding-right: 30px; /* Leave space for the badge */
+}
+
+/* The Floating Icon Badge */
+.checklist-badge {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  border: 3px solid white; /* Gives it a cutout effect */
+}
+
+.checklist-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checklist-item-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: #334155;
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.checklist-item-text.completed {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.check-delete-btn {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  padding: 4px;
+  cursor: pointer;
+}
+.check-delete-btn:hover { color: #ef4444; }
+
+.checklist-add-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+}
+
+.checklist-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  color: #1e293b;
+}
+.checklist-input::placeholder { color: #94a3b8; }
+/* --- CREATE NEW CHECKLIST BAR --- */
+.create-list-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.create-list-input {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  font-size: 15px;
+  outline: none;
+  background: white;
+  color: #1e293b;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.create-list-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 0 20px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.checklist-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding-right: 30px; /* Leave space for the floating badge */
+}
+
+.checklist-title {
+  margin: 0; /* Reset margin since it's now handled by the row */
+}
+
+.delete-list-btn {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 4px;
+}
+.delete-list-btn:hover { color: #ef4444; }
+/* --- SETTINGS PAGE STYLES --- */
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 10px;
+}
+
+.setting-section {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+}
+
+.setting-header {
+  padding: 16px 20px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.setting-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.setting-icon { color: var(--primary); }
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: white;
+}
+
+.setting-row.border-bottom { border-bottom: 1px solid #f1f5f9; }
+
+.setting-text { flex: 1; padding-right: 20px; }
+.setting-text span { display: block; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+.setting-text p { margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.4; }
+
+/* Custom Native-Style Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1; transition: .3s; border-radius: 34px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px;
+  background-color: white; transition: .3s; border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .slider { background-color: var(--primary); }
+.toggle-switch input:checked + .slider:before { transform: translateX(22px); }
+
+/* Dropdowns & Buttons */
+.setting-dropdown {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+}
+
+.setting-action-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  transition: background 0.2s;
+}
+.setting-action-btn:active { background: #f8fafc; }
+.setting-action-btn.danger { color: #ef4444; }
+
+/* Categories Section */
+.categories-container {
+  padding: 16px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.category-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left-width: 4px; 
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.category-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.category-delete-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.category-delete-btn:hover { color: #ef4444; }
+
+.add-category-row {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px dashed #e2e8f0;
+  background: #f8fafc;
+}
+
+.add-category-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  outline: none;
+}
+
+.add-cat-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Footer */
+.settings-footer {
+  text-align: center;
+  padding: 20px 0;
+}
+.settings-footer p {
+  margin: 0 0 4px 0;
+  font-weight: 700;
+  color: #64748b;
+}
+.settings-footer .version {
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+/* --- MODAL CATEGORY SELECTOR --- */
+.modal-categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-top: 10px;
+}
+
+/* Hide scrollbar for a cleaner look */
+.modal-categories::-webkit-scrollbar { 
+  display: none; 
+}
+
+.cat-select-pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.cat-select-pill.selected {
+  border-color: var(--pill-color);
+  background: var(--pill-color-light);
+  color: var(--pill-color);
+}
+/* --- PINNED TASK HIGHLIGHT --- */
+.pinned-bento {
+  background: #fef2f2 !important; /* Soft Red background */
+  border: 1px solid #fca5a5 !important; /* Red border */
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15) !important; /* Red glowing shadow */
+  position: relative;
+}
+
+.pinned-bento:active {
+  transform: scale(0.98);
+}
