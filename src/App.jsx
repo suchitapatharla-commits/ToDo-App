@@ -102,7 +102,7 @@ function App() {
         {activeTab === 'settings' && <SettingsPage />}
         
         {/* CLEANED UP CHECKLIST RENDER */}
-        {activeTab === 'checklist' && <ChecklistPage />}
+        {activeTab === 'checklist' && <CheckListPage />}
 
         {(activeTab === 'home' || activeTab === 'all') && (
           <TaskList tasks={tasks} db={db} reloadTasks={refreshTasks} filter={activeTab} onEdit={openEditModal} />
