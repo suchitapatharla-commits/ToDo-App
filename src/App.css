@@ -32,6 +32,7 @@ html, body {
   height: 100%;
   background-color: var(--bg-app);
   position: relative;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 3. SCROLLABLE CONTENT AREA (The Fix) */
@@ -133,9 +134,10 @@ html, body {
 
 /* --- BOTTOM NAV --- */
 .bottom-nav {
-  height: 80px; background: white; border-top: 1px solid #f1f5f9;
+  height: calc(80px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid #f1f5f9;
   display: flex; justify-content: space-around; align-items: flex-start;
   padding-top: 15px; position: absolute; bottom: 0; width: 100%; z-index: 40;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .bottom-nav button { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 5px; color: #94a3b8; font-size: 11px; font-weight: 500; }
 .bottom-nav button.active { color: var(--primary); }
